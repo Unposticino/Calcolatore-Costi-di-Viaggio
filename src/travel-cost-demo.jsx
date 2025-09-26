@@ -5,7 +5,7 @@ import { Plus, Trash2, Calendar, MapPin, Car, Home, Activity, Shield, StickyNote
 const DynamicList = React.memo(({ items, onAddItem, onRemoveItem, onUpdateItem, fields, addText }) => (
   <div className="space-y-2">
     {items.map((item, index) => (
-      <div key={item.id || index} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+      <div key={item.id || index} className="flex gap-2 items-center">
         {fields.map(field => (
           <input
             key={`${field.key}-${item.id || index}`}
@@ -13,12 +13,12 @@ const DynamicList = React.memo(({ items, onAddItem, onRemoveItem, onUpdateItem, 
             placeholder={field.placeholder}
             value={item[field.key] || ''}
             onChange={(e) => onUpdateItem(index, field.key, e.target.value)}
-            className="flex-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         ))}
         <button
           onClick={() => onRemoveItem(index)}
-          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors mt-1 sm:mt-0"
+          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
         >
           <Trash2 size={16} />
         </button>
@@ -26,7 +26,7 @@ const DynamicList = React.memo(({ items, onAddItem, onRemoveItem, onUpdateItem, 
     ))}
     <button
       onClick={() => onAddItem(fields.reduce((acc, field) => ({ ...acc, [field.key]: '' }), {}))}
-      className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors mt-2"
+      className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
     >
       <Plus size={16} />
       {addText}
@@ -91,7 +91,7 @@ const TravelCostCalculator = () => {
     ));
   }, []);
 
-  // Handlers per le liste (rimangono invariati)
+  // Handlers per le liste
   const handleFuelPriceAdd = useCallback((item) => addItem(setFuelPrices, item), [addItem]);
   const handleFuelPriceRemove = useCallback((index) => removeItem(setFuelPrices, index), [removeItem]);
   const handleFuelPriceUpdate = useCallback((index, field, value) => updateItem(setFuelPrices, index, field, value), [updateItem]);
@@ -124,7 +124,7 @@ const TravelCostCalculator = () => {
   const handleEsimsRemove = useCallback((index) => removeItem(setEsims, index), [removeItem]);
   const handleEsimsUpdate = useCallback((index, field, value) => updateItem(setEsims, index, field, value), [updateItem]);
 
-  // Calcoli dei costi rimangono invariati
+  // Calcoli dei costi
   const calculateFuelCost = () => {
     if (!totalKm || !fuelConsumption) return 0;
     const validPrices = fuelPrices.filter(p => p.price && !isNaN(p.price));
@@ -158,5 +158,63 @@ const TravelCostCalculator = () => {
   const vaccinesCost = calculateListTotal(vaccines);
   const esimsCost = calculateListTotal(esims);
 
-  const totalCost =
+  const totalCost = fuelCost + tollsCost + ferriesCost + trainsCost + insuranceCost + 
+                   mealsCost + accommodationsCost + activitiesCost + healthInsuranceCost + 
+                   vaccinesCost + esimsCost;
 
+  // Funzione per generare il report
+  const generateReport = useCallback(() => {
+    try {
+      const content = `RIEPILOGO COSTI DI VIAGGIO
+========================
+
+DATI DEL VIAGGIO:
+${destination ? `Destinazione: ${destination}` : ''}
+${startDate ? `Data inizio: ${new Date(startDate).toLocaleDateString('it-IT')}` : ''}
+${endDate ? `Data fine: ${new Date(endDate).toLocaleDateString('it-IT')}` : ''}
+${nights > 0 ? `Numero di notti: ${nights}` : ''}
+
+COSTI TRASPORTO:
+Carburante: €${fuelCost.toFixed(2)}
+Pedaggi: €${tollsCost.toFixed(2)}
+Traghetti: €${ferriesCost.toFixed(2)}
+Treni: €${trainsCost.toFixed(2)}
+Assicurazione: €${insuranceCost.toFixed(2)}
+
+COSTI SOGGIORNO:
+Pasti: €${mealsCost.toFixed(2)}
+Pernottamenti: €${accommodationsCost.toFixed(2)}
+Attività: €${activitiesCost.toFixed(2)}
+
+COSTI AGGIUNTIVI:
+Assicurazione sanitaria: €${healthInsuranceCost.toFixed(2)}
+Vaccini: €${vaccinesCost.toFixed(2)}
+E-sim: €${esimsCost.toFixed(2)}
+
+========================
+COSTO TOTALE DEL VIAGGIO: €${totalCost.toFixed(2)}
+========================
+
+Generato il ${new Date().toLocaleDateString('it-IT')}`;
+
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      const fileName = destination ? 
+        `viaggio-${destination.replace(/\s+/g, '-').toLowerCase()}.txt` : 
+        'riepilogo-viaggio.txt';
+      link.download = fileName;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Errore nella generazione del file:', error);
+      alert('Errore nel download. Riprova.');
+    }
+  }, [destination, startDate, endDate,
