@@ -19,9 +19,12 @@
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  flex-direction: column; /* impila gli elementi in verticale */
+  align-items: center; /* centra solo orizzontalmente */
   min-width: 320px;
   min-height: 100vh;
+  padding: 1rem; /* evita che tocchino i bordi */
+  overflow-x: hidden; /* niente scroll orizzontale */
 }
 
 #root {
@@ -34,4 +37,10 @@ body {
     color: #213547;
     background-color: #ffffff;
   }
+}
+
+#root {
+  width: 100%;
+  max-width: 600px; /* evita che diventi troppo largo su iPad */
+  margin: 0 auto;
 }
