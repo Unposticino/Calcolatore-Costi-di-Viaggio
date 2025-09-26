@@ -19,17 +19,17 @@
 body {
   margin: 0;
   display: flex;
-  flex-direction: column; /* impila gli elementi in verticale */
+  flex-direction: column; /* impila gli elementi verticalmente */
   align-items: center; /* centra solo orizzontalmente */
   min-width: 320px;
   min-height: 100vh;
-  padding: 1rem; /* evita che tocchino i bordi */
-  overflow-x: hidden; /* niente scroll orizzontale */
+  padding: 1rem; /* distanza dai bordi */
+  overflow-x: hidden; /* evita scroll orizzontale */
 }
 
 #root {
   width: 100%;
-  max-width: 600px; /* evita che diventi troppo largo su iPad */
+  max-width: 800px; /* massimo su tablet/desktop */
   margin: 0 auto;
 }
 
