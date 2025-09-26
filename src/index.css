@@ -29,6 +29,7 @@ body {
 
 #root {
   width: 100%;
+  max-width: 600px; /* evita che diventi troppo largo su iPad */
   margin: 0 auto;
 }
 
@@ -39,8 +40,4 @@ body {
   }
 }
 
-#root {
-  width: 100%;
-  max-width: 600px; /* evita che diventi troppo largo su iPad */
-  margin: 0 auto;
-}
+
